@@ -5,6 +5,21 @@
       "args": ["dist/index.js"],
       "cwd": "./packages/my-mcp",
       "trust": true
+    },
+    "attlassian": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.atlassian.com/v1/sse"
+      ],
+      "trust": true
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
     }
   }
 }
