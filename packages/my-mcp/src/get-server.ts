@@ -4,6 +4,14 @@ import {
   ResourceTemplate,
 } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
+// import * as fs from "fs/promises";
+// import * as path from "path";
+
+import { promises as fs } from "fs";
+import path from "path";
+import { Ajv } from "ajv";
+
+const ajv = new Ajv();
 
 export function getServer () {
   // Create an MCP server
@@ -55,6 +63,91 @@ export function getServer () {
       }
     }
   )
+
+server.registerResource(
+  "acceptance-criteria-validator",
+  new ResourceTemplate("acceptance-criteria://{ticketId}", { list: undefined }),
+  {
+    title: "Acceptance Criteria Validator",
+    description: "Validates actual acceptance criteria against story.schema.json",
+  },
+  async (uri, { body }) => {
+    try {
+      // Load the schema file from resources directory
+      const filePath = path.join(process.cwd(), "resources", "story.schema.json");
+      const schemaText = await fs.readFile(filePath, "utf-8");
+      const schema = JSON.parse(schemaText);
+
+      // Compile schema
+      const validate = ajv.compile(schema);
+
+      // Parse body to get actual criteria
+      const criteriaInput = typeof body === "string" ? JSON.parse(body) : body;
+
+      const valid = validate(criteriaInput);
+
+      if (valid) {
+        return {
+          contents: [
+            {
+              uri: uri.href,
+              text: "✅ Acceptance Criteria are valid.",
+            },
+          ],
+        };
+      } else {
+        const errorText = ajv.errorsText(validate.errors);
+        return {
+          contents: [
+            {
+              uri: uri.href,
+              text: `❌ Validation failed:\n${errorText}`,
+            },
+          ],
+        };
+      }
+    } catch (err) {
+      console.error("Validation error:", err);
+      return {
+        contents: [
+          {
+            uri: uri.href,
+            text: `❌ Error processing request: ${err.message}`,
+          },
+        ],
+      };
+    }
+  }
+);
+
+
+// Register the schema as a static resource from local filesystem
+/* server.registerResource(
+  "acceptance-criteria-schema",
+  new ResourceTemplate("acceptance-criteria://{policy}", { list: undefined }),
+  {
+    title: "Acceptance Criteria Schema",
+    description: "JSON Schema used to validate JIRA ticket acceptance criteria. ",
+  },
+  async (uri) => {
+    try {
+      const filePath = path.join(process.cwd(), "resources", "story.schema.json");
+      const jsonSchema = await fs.readFile(filePath, "utf-8");
+
+      return {
+        contents: [
+          {
+            uri: uri.href,
+            text: jsonSchema,
+          },
+        ],
+      };
+    } catch (err) {
+      console.error("Failed to read schema file:", err);
+      throw err;
+    }
+  }
+); */
 
   return server
 }
