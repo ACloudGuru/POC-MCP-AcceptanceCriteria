@@ -32,6 +32,9 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.17.0
         version: 1.17.0
+      ajv:
+        specifier: ^8.17.1
+        version: 8.17.1
       express:
         specifier: ^5.1.0
         version: 5.1.0
