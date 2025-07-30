@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Story Acceptance Criteria",
+  "description": "Schema for validating acceptance criteria in a JIRA story ticket.",
+  "type": "object",
+  "required": ["criteria"],
+  "properties": {
+    "criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["given", "when", "then"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "A unique identifier for the criterion",
+            "pattern": "^AC-[0-9]+$"
+          },
+          "given": {
+            "type": "string",
+            "description": "Precondition or context"
+          },
+          "when": {
+            "type": "string",
+            "description": "Trigger action"
+          },
+          "then": {
+            "type": "string",
+            "description": "Expected outcome"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Optional notes or clarifications"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "List of acceptance criteria in Given/When/Then format"
+    }
+  },
+  "additionalProperties": false
+}
